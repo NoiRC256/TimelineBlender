@@ -1,8 +1,13 @@
 # TimelineBlender
- A lightweight utility class for fading timelines
+
 
 # Usage
-A `TimelineBlender` instance provides the ability to fade in / fade out a playable director's animation output.
+A `TimelineBlender` instance provides the ability to fade in and fade out a playable director's animation output.
+
+### Initialize
+```csharp
+timelineBlender = new TimelineBlender(playableDirector);
+```
 
 ### Fade in
 Set the desired `_playableDirector.time` to start at. The timeline automatically starts or resumes when it begins to fade in.
