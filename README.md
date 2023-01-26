@@ -4,9 +4,17 @@
 # Usage
 A `TimelineBlender` instance provides the ability to fade in and fade out a playable director's animation output.
 
-### Initialize
+### Setup
+Create a timeline blender instance.
 ```csharp
 timelineBlender = new TimelineBlender(playableDirector);
+```
+Tick the timeline blender.
+```csharp
+private void Update()
+{
+    timelineBlender.OnUpdate(Time.deltaTime);
+}
 ```
 
 ### Fade in
