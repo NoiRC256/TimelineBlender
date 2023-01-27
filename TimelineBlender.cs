@@ -17,16 +17,27 @@ namespace NekoNeko
         }
 
         public AnimationPlayableOutput AnimationPlayableOutput => _output;
+        public bool IsFading => _isFading;
+        public bool IsFadingIn => _isFadingIn;
+        public bool IsFadingOut => _isFadingOut;
 
         #region Fields
+        private PlayableDirector _playableDirector;
         private AnimationPlayableOutput _output;
         private bool _isFading;
+        private bool _isFadingIn;
+        private bool _isFadingOut;
         private float _fadeSpeed;
         #endregion
 
         #region Events
         public event Action FadeOutCompleted;
         #endregion
+
+        public TimelineBlender(PlayableDirector playableDirector)
+        {
+            _playableDirector = playableDirector;
+        }
 
         #region Control
         /// <summary>
@@ -37,7 +48,8 @@ namespace NekoNeko
         {
             if (!playableDirector.playableGraph.IsValid())
             {
-                playableDirector.RebuildGraph();
+                playableDirector.Play();
+                playableDirector.Pause();
                 ConnectDummyOutput(playableDirector);
             }
         }
@@ -57,8 +69,10 @@ namespace NekoNeko
         /// <param name="duration"></param>
         public void FadeIn(float duration)
         {
+            Setup(_playableDirector);
+            _playableDirector.Resume();
             StopFade();
-            if (duration == 0f)
+            if (duration > 0f)
             {
                 SetWeight(0f);
                 StartFade(FadeMode.In, duration);
@@ -78,6 +92,7 @@ namespace NekoNeko
             if (duration == 0f)
             {
                 SetWeight(0f);
+                _playableDirector.Pause();
                 FadeOutCompleted?.Invoke();
                 return;
             }
@@ -92,9 +107,11 @@ namespace NekoNeko
             {
                 case FadeMode.In:
                     _fadeSpeed = 1f / duration;
+                    _isFadingIn = true;
                     break;
                 case FadeMode.Out:
                     _fadeSpeed = -1f / duration;
+                    _isFadingOut = true;
                     break;
             }
             _isFading = true;
@@ -106,19 +123,20 @@ namespace NekoNeko
 
             float weight = GetWeight();
             weight += _fadeSpeed * deltaTime;
-            if (weight >= 1f)
+            if (_isFadingIn && weight >= 1f)
             {
                 // Fade in complete.
-                SetWeight(1f);
                 StopFade();
+                SetWeight(1f);
                 return;
             }
-            else if (weight <= 0f)
+            else if (_isFadingOut && weight <= 0f)
             {
                 // Fade out complete.
-                SetWeight(0f);
                 StopFade();
+                SetWeight(0f);
                 UnityEngine.Debug.Log("Fade out complete.");
+                _playableDirector.Pause();
                 FadeOutCompleted?.Invoke();
                 return;
             }
@@ -127,7 +145,7 @@ namespace NekoNeko
 
         private void StopFade()
         {
-            _isFading = false;
+            _isFading = _isFadingIn = _isFadingOut = false;
             _fadeSpeed = 0f;
         }
         #endregion

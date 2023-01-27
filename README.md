@@ -1,8 +1,5 @@
-# TimelineBlender
-
-
-# Usage
-A `TimelineBlender` instance provides the ability to fade in and fade out a playable director's animation output.
+# Overview
+TimelineBlender provides the ability to fade in and fade out a playable director's animation output at any point in time.
 
 ### Setup
 Create a timeline blender instance.
